@@ -1,48 +1,58 @@
-const getShinyBaseDigitsFor = (x) => {
-    const rtnDigits = [];
-    for (let i = x * 11; i < (x + 1) * 10; i++) {
-        rtnDigits.push(i)
+const isShiny = (n) => {
+    if (n < 10) {
+        return true;
+    } else {
+        let lastDigit = n % 10;
+        n = parseInt(n / 10)
+        let secondToLastDigit = 0;
+        while (n > 0) {
+            secondToLastDigit = n % 10;
+            if (secondToLastDigit > lastDigit)
+                return false;
+            else {
+                n = parseInt(n / 10)
+                lastDigit = secondToLastDigit
+            }
+        }
+        return true
     }
-    return rtnDigits;
+}
+
+const nextShiny = n => {
+    let repeatLastDigit = false;
+    let currNumber = 0;
+    const digits = n.toString().split('').map(d => parseInt(d))
+    let lastDigit = currNumber = digits.shift();
+    while (digits.length) {
+        let d = digits.shift()
+        if (repeatLastDigit || lastDigit > d) {
+            repeatLastDigit = true
+            currNumber = currNumber * 10 + lastDigit
+        } else {
+            currNumber = currNumber * 10 + d;
+            lastDigit = d;
+        }
+    }
+    return currNumber
+}
+
+const getShinyNumbers = (n) => {
+    const shinyArray = [];
+    let currNumber = n
+    while (shinyArray.length < 100) {
+        if (!isShiny(currNumber)) {
+            currNumber = nextShiny(currNumber)
+            shinyArray.push(currNumber)
+            currNumber++;
+        } else {
+            shinyArray.push(currNumber)
+            currNumber++;
+        }
+    }
+    return shinyArray;
 }
 
 
-const getShinyNumbers = () => {
-    const n = 100;
-    const shinyHash = {}
-
-    let shinyCount = 0;
-    let currDigit = 0;
-
-    // get base-shiny
-    while (shinyCount < n) {
-        if (currDigit < 10) {
-            const nextDigits = getShinyBaseDigitsFor(currDigit)
-            shinyHash[currDigit] = nextDigits;
-            shinyCount += nextDigits.length
-            currDigit++
-        } else {
-            break;
-        }
-    }
-
-    // deduce the rest
-    currDigit = 1
-    while (shinyCount < n) {
-        const nextDigits = shinyHash[currDigit].map(r => r + (currDigit * 100))
-        if (shinyCount + nextDigits.length <= n) {
-            shinyHash[currDigit * 10] = nextDigits;
-            shinyCount += nextDigits.length;
-            currDigit++
-        } else {
-            shinyHash[currDigit * 10] = nextDigits.slice(0, n - (shinyCount + nextDigits.length))
-            break;
-        }
-    }
-
-    return Object.values(shinyHash).flat(1).sort((a, b) => a - b);
-}
-
-
-const shinyArray = getShinyNumbers();
-console.log(shinyArray)
+const n = 0;
+const shinyArray = getShinyNumbers(n);
+console.log({ n, length: shinyArray.length, shinyArray })
